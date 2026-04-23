@@ -14,5 +14,4 @@ else
     echo "---" >> "$LOG_FILE"
     echo "[GitHub Sync] Push to GitHub failed:" >&2
     echo "$output" >&2
-    exit 1
 fi
