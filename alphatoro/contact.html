@@ -46,40 +46,66 @@
 <section class="contact">
   <div class="container contact__grid">
 
-    <div data-fs-success style="display:none; padding: 1.5rem; background: var(--graphite); border-left: 3px solid var(--red); color: var(--white); border-radius: 4px; margin-bottom: 1rem;">
+    <div id="form-success" style="display:none; padding: 1.5rem; background: var(--graphite); border-left: 3px solid var(--red); color: var(--white); border-radius: 4px; margin-bottom: 1rem;">
       <strong>Message sent.</strong> We'll be in touch within one business day.
     </div>
-    <div data-fs-error style="display:none; padding: 1rem; background: var(--graphite); border-left: 3px solid #c0392b; color: var(--white); border-radius: 4px; margin-bottom: 1rem;"></div>
+    <div id="form-error" style="display:none; padding: 1rem; background: var(--graphite); border-left: 3px solid #c0392b; color: var(--white); border-radius: 4px; margin-bottom: 1rem;">
+      Something went wrong. Please try again or email <a href="mailto:adaphna@alphatoro.us" style="color:inherit; text-decoration:underline;">adaphna@alphatoro.us</a> directly.
+    </div>
 
     <form id="contact-form" class="contact-form" data-reveal novalidate>
       <div class="field">
         <label for="name">Name</label>
-        <input type="text" id="name" name="name" required autocomplete="name" data-fs-field>
-        <span data-fs-error="name" style="font-size: 0.8rem; color: #e74c3c; margin-top: 0.25rem; display: block;"></span>
+        <input type="text" id="name" name="name" required autocomplete="name">
       </div>
       <div class="field">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" required autocomplete="email" data-fs-field>
-        <span data-fs-error="email" style="font-size: 0.8rem; color: #e74c3c; margin-top: 0.25rem; display: block;"></span>
+        <input type="email" id="email" name="email" required autocomplete="email">
       </div>
       <div class="field">
         <label for="firm">Firm</label>
-        <input type="text" id="firm" name="firm" autocomplete="organization" data-fs-field>
+        <input type="text" id="firm" name="firm" autocomplete="organization">
       </div>
       <div class="field">
         <label for="message">Message</label>
-        <textarea id="message" name="message" required placeholder="Tell us about your commercial delivery and where you want the federal fit to live." data-fs-field></textarea>
-        <span data-fs-error="message" style="font-size: 0.8rem; color: #e74c3c; margin-top: 0.25rem; display: block;"></span>
+        <textarea id="message" name="message" required placeholder="Tell us about your commercial delivery and where you want the federal fit to live."></textarea>
       </div>
-      <button type="submit" class="btn btn--red" data-fs-submit-btn>Send Message <span class="arrow" aria-hidden="true">→</span></button>
+      <button type="submit" id="submit-btn" class="btn btn--red">Send Message <span class="arrow" aria-hidden="true">→</span></button>
       <p style="font-size: 0.8125rem; color: var(--silver); margin: 0;">Or email <a href="mailto:adaphna@alphatoro.us" class="link-red">adaphna@alphatoro.us</a> directly.</p>
     </form>
 
     <script>
-      window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
-      formspree('initForm', { formElement: '#contact-form', formId: 'xkokpkdn' });
+      const contactForm = document.getElementById('contact-form');
+      const successMsg = document.getElementById('form-success');
+      const errorMsg = document.getElementById('form-error');
+      const submitBtn = document.getElementById('submit-btn');
+
+      contactForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+        errorMsg.style.display = 'none';
+
+        try {
+          const response = await fetch('https://formspree.io/f/xkokpkdn', {
+            method: 'POST',
+            body: new FormData(contactForm),
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (response.ok) {
+            contactForm.style.display = 'none';
+            successMsg.style.display = 'block';
+          } else {
+            throw new Error('Server error');
+          }
+        } catch (err) {
+          errorMsg.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Send Message <span class="arrow" aria-hidden="true">→</span>';
+        }
+      });
     </script>
-    <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 
     <div class="contact-info" data-reveal>
       <div class="contact-info__block">
