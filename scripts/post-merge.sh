@@ -16,9 +16,23 @@ else
     echo "$output" >&2
 
     if [ -n "$FORMSPREE_ENDPOINT" ]; then
-        curl -s -X POST "$FORMSPREE_ENDPOINT" \
+        msg_body="GitHub sync failed.
+
+Branch:    $BRANCH
+Time:      $TIMESTAMP
+
+Error output:
+$output"
+        payload=$(jq -n \
+            --arg subject "[GitHub Sync] Push failed on branch '$BRANCH'" \
+            --arg message "$msg_body" \
+            '{"subject": $subject, "message": $message}')
+        alert_http_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$FORMSPREE_ENDPOINT" \
             -H "Content-Type: application/json" \
-            --data "{\"subject\":\"[GitHub Sync] Push failed on branch '$BRANCH'\",\"message\":\"GitHub sync failed.\n\nBranch: $BRANCH\nTime: $TIMESTAMP\n\nError output:\n$output\"}" \
-            > /dev/null 2>&1 || true
+            --data "$payload" 2>&1)
+        if [ "$alert_http_code" != "200" ]; then
+            echo "[$TIMESTAMP] ALERT: Failed to deliver failure notification (HTTP $alert_http_code)" >> "$LOG_FILE"
+            echo "[GitHub Sync] Failed to deliver failure notification (HTTP $alert_http_code)" >&2
+        fi
     fi
 fi
