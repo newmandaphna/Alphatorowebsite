@@ -25,4 +25,11 @@ Static marketing website for Alpha Toro Holdings LLC (ALPHATORO), a firm special
 ```
 
 ## Running the App
-The workflow `Start application` runs `node server.js` and serves the site on port 5000.
+The workflow `Start application` runs `sh setup-git.sh && node server.js` and serves the site on port 5000.
+
+## GitHub Sync
+Automatic GitHub credential configuration is set up via two scripts:
+- **`.git-credentials-helper.sh`** — returns the `GITHUB_TOKEN` secret as the git password (using `x-access-token` as the username, which is correct for GitHub PATs)
+- **`setup-git.sh`** — configures local git config to use the credential helper; runs automatically on every app startup
+
+After the workflow has started at least once, `git push origin main` works from the shell without supplying a token. You can also run `sh setup-git.sh` manually in the shell before pushing if the workflow hasn't been started yet.
