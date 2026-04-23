@@ -25,12 +25,9 @@ alphatoro/
 ├── script.js
 ├── README.md
 └── assets/
-    ├── logo.png            (full ALPHATORO lockup)
+    ├── logo.png            (full ALPHATORO lockup — also used as apple-touch-icon)
     ├── bull.png            (bull only — hero visual)
-    ├── bull-light.png      (white bull for dark backgrounds)
-    ├── bull-icon.png       (square bull mark — nav & footer)
-    ├── favicon-32.png
-    └── apple-touch-icon.png
+    └── bull-icon.png       (square bull mark — nav & footer)
 ```
 
 ## Brand system applied
