@@ -46,26 +46,40 @@
 <section class="contact">
   <div class="container contact__grid">
 
-    <form class="contact-form" data-reveal novalidate>
+    <div data-fs-success style="display:none; padding: 1.5rem; background: var(--graphite); border-left: 3px solid var(--red); color: var(--white); border-radius: 4px; margin-bottom: 1rem;">
+      <strong>Message sent.</strong> We'll be in touch within one business day.
+    </div>
+    <div data-fs-error style="display:none; padding: 1rem; background: var(--graphite); border-left: 3px solid #c0392b; color: var(--white); border-radius: 4px; margin-bottom: 1rem;"></div>
+
+    <form id="contact-form" class="contact-form" data-reveal novalidate>
       <div class="field">
         <label for="name">Name</label>
-        <input type="text" id="name" name="name" required autocomplete="name">
+        <input type="text" id="name" name="name" required autocomplete="name" data-fs-field>
+        <span data-fs-error="name" style="font-size: 0.8rem; color: #e74c3c; margin-top: 0.25rem; display: block;"></span>
       </div>
       <div class="field">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" required autocomplete="email">
+        <input type="email" id="email" name="email" required autocomplete="email" data-fs-field>
+        <span data-fs-error="email" style="font-size: 0.8rem; color: #e74c3c; margin-top: 0.25rem; display: block;"></span>
       </div>
       <div class="field">
         <label for="firm">Firm</label>
-        <input type="text" id="firm" name="firm" autocomplete="organization">
+        <input type="text" id="firm" name="firm" autocomplete="organization" data-fs-field>
       </div>
       <div class="field">
         <label for="message">Message</label>
-        <textarea id="message" name="message" required placeholder="Tell us about your commercial delivery and where you want the federal fit to live."></textarea>
+        <textarea id="message" name="message" required placeholder="Tell us about your commercial delivery and where you want the federal fit to live." data-fs-field></textarea>
+        <span data-fs-error="message" style="font-size: 0.8rem; color: #e74c3c; margin-top: 0.25rem; display: block;"></span>
       </div>
-      <button type="submit" class="btn btn--red">Send Message <span class="arrow" aria-hidden="true">→</span></button>
+      <button type="submit" class="btn btn--red" data-fs-submit-btn>Send Message <span class="arrow" aria-hidden="true">→</span></button>
       <p style="font-size: 0.8125rem; color: var(--silver); margin: 0;">Or email <a href="mailto:adaphna@alphatoro.us" class="link-red">adaphna@alphatoro.us</a> directly.</p>
     </form>
+
+    <script>
+      window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
+      formspree('initForm', { formElement: '#contact-form', formId: 'xkokpkdn' });
+    </script>
+    <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 
     <div class="contact-info" data-reveal>
       <div class="contact-info__block">

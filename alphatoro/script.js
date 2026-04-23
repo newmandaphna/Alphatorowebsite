@@ -44,20 +44,3 @@ if (industrySections.length && industryLinks.length) {
   industrySections.forEach(s => io.observe(s));
 }
 
-// Simple form handler — mailto fallback
-const form = document.querySelector('.contact-form');
-if (form) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-    const name = data.get('name') || '';
-    const email = data.get('email') || '';
-    const firm = data.get('firm') || '';
-    const message = data.get('message') || '';
-    const subject = encodeURIComponent(`ALPHATORO inquiry from ${name}${firm ? ` (${firm})` : ''}`);
-    const body = encodeURIComponent(
-      `Name: ${name}\nEmail: ${email}\nFirm: ${firm}\n\n${message}`
-    );
-    window.location.href = `mailto:adaphna@alphatoro.us?subject=${subject}&body=${body}`;
-  });
-}
