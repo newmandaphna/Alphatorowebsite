@@ -36,10 +36,10 @@ $output"
                 "import json,sys; print(json.dumps({'subject':sys.argv[1],'message':sys.argv[2]}))" \
                 "[GitHub Sync] Push failed on branch '$BRANCH'" "$msg_body")
         fi
-        alert_http_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$FORMSPREE_ENDPOINT" \
+        alert_http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 -X POST "$FORMSPREE_ENDPOINT" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json" \
-            --data "$payload" 2>&1)
+            --data "$payload" 2>/dev/null)
         case "$alert_http_code" in
             2*)
                 ;;
