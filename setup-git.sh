@@ -18,13 +18,8 @@ else
     echo "[GitHub Sync] Push to GitHub failed:" >&2
     echo "$output" >&2
 
-    if [ -n "$SLACK_WEBHOOK_URL" ]; then
-        SLACK_MESSAGE="GitHub sync failed for branch \`$BRANCH\` at $TIMESTAMP.\n\`\`\`$output\`\`\`"
-        curl -s -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-type: application/json' \
-            --data "{\"text\":\"$SLACK_MESSAGE\"}" \
-            > /dev/null 2>&1 || true
-    fi
+    REPO_ROOT="$(git rev-parse --show-toplevel)"
+    python3 "$REPO_ROOT/scripts/send-failure-email.py" "$BRANCH" "$TIMESTAMP" "$output" 2>&1 || true
 fi
 exit 0
 HOOK

@@ -42,11 +42,12 @@ Every push attempt (from both the post-commit hook and the post-merge script) ap
 The log file is excluded from git via `.gitignore` — it is a local runtime artifact, not source code.
 
 ### Sync Failure Alerts
-When a push fails, both the post-commit hook and the post-merge script will send a Slack notification if the **`SLACK_WEBHOOK_URL`** secret is configured. The notification includes the branch name, timestamp, and full error output.
+When a push fails, both the post-commit hook and the post-merge script send an email alert to **adaphna@alphatoro.us** via `scripts/send-failure-email.py`. The email includes the branch name, timestamp, and full error output.
 
-To enable alerts:
-1. Create an **Incoming Webhook** in your Slack workspace (Apps → Incoming Webhooks → Add New Webhook to Workspace).
-2. Copy the webhook URL (it looks like `https://hooks.slack.com/services/...`).
-3. Add it as the **`SLACK_WEBHOOK_URL`** secret in Replit's Secrets tab.
+To enable alerts, add the following secrets in Replit's Secrets tab:
+- **`SMTP_HOST`** — your outgoing mail server (e.g. `smtp.gmail.com`)
+- **`SMTP_PORT`** — typically `587` for TLS (defaults to 587 if not set)
+- **`SMTP_USER`** — the sender email address / SMTP username
+- **`SMTP_PASSWORD`** — the SMTP password or app password
 
-If `SLACK_WEBHOOK_URL` is not set, failures are still logged to `github-sync-status.log` and echoed to stderr as before — no alert is sent, but nothing breaks.
+If any of `SMTP_HOST`, `SMTP_USER`, or `SMTP_PASSWORD` are missing, the email step is silently skipped — failures are still logged to `github-sync-status.log` and echoed to stderr as before.
