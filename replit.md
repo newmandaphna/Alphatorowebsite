@@ -40,3 +40,13 @@ Every push attempt (from both the post-commit hook and the post-merge script) ap
 - `[TIMESTAMP] FAILED: push of branch '...' to GitHub failed` followed by the full error output on failure; failures are also echoed to stderr
 
 The log file is excluded from git via `.gitignore` — it is a local runtime artifact, not source code.
+
+### Sync Failure Alerts
+When a push fails, both the post-commit hook and the post-merge script send an email alert to **adaphna@alphatoro.us** via Formspree. The notification includes the branch name, timestamp, and full error output.
+
+To enable alerts:
+1. Go to [formspree.io/forms](https://formspree.io/forms) and create a new form pointed at `adaphna@alphatoro.us`.
+2. Copy the form endpoint URL (looks like `https://formspree.io/f/XXXXXXXX`).
+3. Add it as the **`FORMSPREE_ENDPOINT`** environment variable in Replit's Secrets tab.
+
+If `FORMSPREE_ENDPOINT` is not set, the alert step is silently skipped — failures are still logged to `github-sync-status.log` and echoed to stderr as before.
