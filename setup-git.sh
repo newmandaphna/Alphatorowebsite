@@ -9,6 +9,7 @@ cat > "$HOOK_FILE" << 'HOOK'
 LOG_FILE="$(git rev-parse --show-toplevel)/github-sync-status.log"
 BRANCH=$(git symbolic-ref --short -q HEAD || echo "main")
 TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+git pull --rebase origin "$BRANCH" 2>/dev/null || true
 if output=$(git push origin HEAD:"$BRANCH" 2>&1); then
     echo "[$TIMESTAMP] SUCCESS: pushed branch '$BRANCH' to GitHub" >> "$LOG_FILE"
 else
