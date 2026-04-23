@@ -42,12 +42,11 @@ Every push attempt (from both the post-commit hook and the post-merge script) ap
 The log file is excluded from git via `.gitignore` — it is a local runtime artifact, not source code.
 
 ### Sync Failure Alerts
-When a push fails, both the post-commit hook and the post-merge script send an email alert to **adaphna@alphatoro.us** via `scripts/send-failure-email.py`. The email includes the branch name, timestamp, and full error output.
+When a push fails, both the post-commit hook and the post-merge script send an email alert to **adaphna@alphatoro.us** via Formspree. The notification includes the branch name, timestamp, and full error output.
 
-To enable alerts, add the following secrets in Replit's Secrets tab:
-- **`SMTP_HOST`** — your outgoing mail server (e.g. `smtp.gmail.com`)
-- **`SMTP_PORT`** — typically `587` for TLS (defaults to 587 if not set)
-- **`SMTP_USER`** — the sender email address / SMTP username
-- **`SMTP_PASSWORD`** — the SMTP password or app password
+To enable alerts:
+1. Go to [formspree.io/forms](https://formspree.io/forms) and create a new form pointed at `adaphna@alphatoro.us`.
+2. Copy the form endpoint URL (looks like `https://formspree.io/f/XXXXXXXX`).
+3. Add it as the **`FORMSPREE_ENDPOINT`** environment variable in Replit's Secrets tab.
 
-If any of `SMTP_HOST`, `SMTP_USER`, or `SMTP_PASSWORD` are missing, the email step is silently skipped — failures are still logged to `github-sync-status.log` and echoed to stderr as before.
+If `FORMSPREE_ENDPOINT` is not set, the alert step is silently skipped — failures are still logged to `github-sync-status.log` and echoed to stderr as before.

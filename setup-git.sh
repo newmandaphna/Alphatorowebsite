@@ -18,8 +18,12 @@ else
     echo "[GitHub Sync] Push to GitHub failed:" >&2
     echo "$output" >&2
 
-    REPO_ROOT="$(git rev-parse --show-toplevel)"
-    python3 "$REPO_ROOT/scripts/send-failure-email.py" "$BRANCH" "$TIMESTAMP" "$output" 2>&1 || true
+    if [ -n "$FORMSPREE_ENDPOINT" ]; then
+        curl -s -X POST "$FORMSPREE_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            --data "{\"subject\":\"[GitHub Sync] Push failed on branch '$BRANCH'\",\"message\":\"GitHub sync failed.\n\nBranch: $BRANCH\nTime: $TIMESTAMP\n\nError output:\n$output\"}" \
+            > /dev/null 2>&1 || true
+    fi
 fi
 exit 0
 HOOK
