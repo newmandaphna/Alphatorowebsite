@@ -2,7 +2,7 @@
 
 Production-ready static site for Alpha Toro Holdings LLC. Built with plain HTML, CSS, and a tiny bit of vanilla JS. No build step. Deploy anywhere.
 
-Built against the ALPHATORO Brand Guidelines 2024 — exact palette, real logo assets, Abe's portrait from the guidelines.
+Built against the ALPHATORO Brand Guidelines 2024 — exact palette, real logo assets.
 
 ## Pages
 
@@ -29,12 +29,9 @@ alphatoro/
     ├── bull.png            (bull only — hero visual)
     ├── bull-light.png      (white bull for dark backgrounds)
     ├── bull-icon.png       (square bull mark — nav & footer)
-    ├── abe-daphna.png      (circular portrait)
     ├── favicon-32.png
     └── apple-touch-icon.png
 ```
-
-There are also several intermediate `brand-NN.png` and `abe-raw.png` files in `assets/` left over from logo extraction. They're not referenced by any page and can be safely deleted before deploying.
 
 ## Brand system applied
 
