@@ -98,7 +98,7 @@ function saveReportState(lastSentMs) {
   }
 }
 
-async function sendReport() {
+async function sendReport(periodStartMs, periodEndMs) {
   let raw = '';
   try {
     raw = fs.readFileSync(LOG_FILE, 'utf8');
@@ -112,10 +112,11 @@ async function sendReport() {
     return;
   }
 
-  const now = new Date();
-  const threeDaysAgo = new Date(now - REPORT_INTERVAL_MS);
-  const periodStart = threeDaysAgo.toISOString().slice(0, 10);
-  const periodEnd = now.toISOString().slice(0, 10);
+  const now = Date.now();
+  const windowEnd = periodEndMs != null ? periodEndMs : now;
+  const windowStart = periodStartMs != null ? periodStartMs : windowEnd - REPORT_INTERVAL_MS;
+  const periodStart = new Date(windowStart).toISOString().slice(0, 10);
+  const periodEnd = new Date(windowEnd).toISOString().slice(0, 10);
 
   const payload = buildReportEmail(lines, periodStart, periodEnd);
   if (!payload) {
@@ -149,8 +150,20 @@ function startReportScheduler() {
   if (state && typeof state.lastSentMs === 'number') {
     const elapsed = now - state.lastSentMs;
     const remaining = REPORT_INTERVAL_MS - elapsed;
-    delay = remaining > 0 ? remaining : 0;
-    console.log(`[report] Resuming scheduler — next report in ${Math.round(delay / 1000 / 60)} minute(s).`);
+    if (remaining > 0) {
+      delay = remaining;
+      console.log(`[report] Resuming scheduler — next report in ${Math.round(delay / 1000 / 60)} minute(s).`);
+    } else {
+      delay = 0;
+      const missedWindowStart = state.lastSentMs;
+      const missedWindowEnd = state.lastSentMs + REPORT_INTERVAL_MS;
+      console.log('[report] Window expired while offline — sending overdue report now.');
+      setTimeout(() => {
+        sendReport(missedWindowStart, missedWindowEnd);
+        setInterval(sendReport, REPORT_INTERVAL_MS);
+      }, 0);
+      return;
+    }
   } else {
     delay = REPORT_INTERVAL_MS;
     console.log('[report] No prior state found — scheduling first report in 3 days.');
