@@ -26,11 +26,6 @@ const mimeTypes = {
   '.json': 'application/json',
 };
 
-const ASSET_EXTENSIONS = new Set([
-  '.css', '.js', '.png', '.jpg', '.jpeg', '.gif',
-  '.svg', '.ico', '.webp', '.woff', '.woff2', '.ttf', '.json'
-]);
-
 function logVisit(urlPath, userAgent) {
   const now = new Date();
   const timestamp = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
@@ -94,10 +89,7 @@ async function sendReport() {
   }
 
   const lines = raw.split('\n').filter(l => l.trim().length > 0);
-  if (lines.length === 0) {
-    console.log('[report] No visits in this period — skipping email.');
-    return;
-  }
+  if (lines.length === 0) return;
 
   const now = new Date();
   const threeDaysAgo = new Date(now - REPORT_INTERVAL_MS);
@@ -158,7 +150,7 @@ const server = http.createServer((req, res) => {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = mimeTypes[ext] || 'application/octet-stream';
 
-    if (!ASSET_EXTENSIONS.has(ext)) {
+    if (ext === '.html') {
       logVisit(urlPath, req.headers['user-agent']);
     }
 
