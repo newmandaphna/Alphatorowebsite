@@ -106,8 +106,8 @@ async function sendReport(periodStartMs, periodEndMs) {
     return;
   }
 
-  const lines = raw.split('\n').filter(l => l.trim().length > 0);
-  if (lines.length === 0) {
+  const allLines = raw.split('\n').filter(l => l.trim().length > 0);
+  if (allLines.length === 0) {
     saveReportState(Date.now());
     return;
   }
@@ -118,7 +118,36 @@ async function sendReport(periodStartMs, periodEndMs) {
   const periodStart = new Date(windowStart).toISOString().slice(0, 10);
   const periodEnd = new Date(windowEnd).toISOString().slice(0, 10);
 
-  const payload = buildReportEmail(lines, periodStart, periodEnd);
+  let reportLines;
+  let leftoverLines;
+
+  if (periodStartMs != null || periodEndMs != null) {
+    reportLines = [];
+    leftoverLines = [];
+    for (const line of allLines) {
+      const tsMatch = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC/);
+      if (tsMatch) {
+        const lineMs = new Date(tsMatch[1].replace(' ', 'T') + 'Z').getTime();
+        if (lineMs <= windowEnd) {
+          reportLines.push(line);
+        } else {
+          leftoverLines.push(line);
+        }
+      } else {
+        reportLines.push(line);
+      }
+    }
+  } else {
+    reportLines = allLines;
+    leftoverLines = [];
+  }
+
+  if (reportLines.length === 0) {
+    saveReportState(Date.now());
+    return;
+  }
+
+  const payload = buildReportEmail(reportLines, periodStart, periodEnd);
   if (!payload) {
     console.log('[report] Could not parse log entries — skipping email.');
     return;
@@ -131,8 +160,8 @@ async function sendReport(periodStartMs, periodEndMs) {
       body: JSON.stringify(payload),
     });
     if (res.ok) {
-      console.log(`[report] Summary email sent (${lines.length} visits).`);
-      fs.writeFileSync(LOG_FILE, '');
+      console.log(`[report] Summary email sent (${reportLines.length} visits).`);
+      fs.writeFileSync(LOG_FILE, leftoverLines.length > 0 ? leftoverLines.join('\n') + '\n' : '');
       saveReportState(Date.now());
     } else {
       console.error(`[report] Formspree responded with status ${res.status} — log not cleared.`);
