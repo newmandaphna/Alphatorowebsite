@@ -6,6 +6,7 @@ const PORT = 5000;
 const HOST = '0.0.0.0';
 const ROOT = path.join(__dirname, 'alphatoro');
 const LOG_FILE = path.join(__dirname, 'visits.log');
+const STATE_FILE = path.join(__dirname, 'report-state.json');
 const FORMSPREE_URL = 'https://formspree.io/f/xkokpkdn';
 const REPORT_INTERVAL_MS = 72 * 60 * 60 * 1000;
 
@@ -80,6 +81,23 @@ function buildReportEmail(lines, periodStart, periodEnd) {
   return { subject, message: body };
 }
 
+function readReportState() {
+  try {
+    const raw = fs.readFileSync(STATE_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveReportState(lastSentMs) {
+  try {
+    fs.writeFileSync(STATE_FILE, JSON.stringify({ lastSentMs }));
+  } catch (e) {
+    console.error('[report] Failed to save report state:', e.message);
+  }
+}
+
 async function sendReport() {
   let raw = '';
   try {
@@ -89,7 +107,10 @@ async function sendReport() {
   }
 
   const lines = raw.split('\n').filter(l => l.trim().length > 0);
-  if (lines.length === 0) return;
+  if (lines.length === 0) {
+    saveReportState(Date.now());
+    return;
+  }
 
   const now = new Date();
   const threeDaysAgo = new Date(now - REPORT_INTERVAL_MS);
@@ -111,12 +132,34 @@ async function sendReport() {
     if (res.ok) {
       console.log(`[report] Summary email sent (${lines.length} visits).`);
       fs.writeFileSync(LOG_FILE, '');
+      saveReportState(Date.now());
     } else {
       console.error(`[report] Formspree responded with status ${res.status} — log not cleared.`);
     }
   } catch (err) {
     console.error('[report] Failed to send report email:', err.message);
   }
+}
+
+function startReportScheduler() {
+  const state = readReportState();
+  const now = Date.now();
+  let delay;
+
+  if (state && typeof state.lastSentMs === 'number') {
+    const elapsed = now - state.lastSentMs;
+    const remaining = REPORT_INTERVAL_MS - elapsed;
+    delay = remaining > 0 ? remaining : 0;
+    console.log(`[report] Resuming scheduler — next report in ${Math.round(delay / 1000 / 60)} minute(s).`);
+  } else {
+    delay = REPORT_INTERVAL_MS;
+    console.log('[report] No prior state found — scheduling first report in 3 days.');
+  }
+
+  setTimeout(() => {
+    sendReport();
+    setInterval(sendReport, REPORT_INTERVAL_MS);
+  }, delay);
 }
 
 const server = http.createServer((req, res) => {
@@ -168,6 +211,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}`);
-  setInterval(sendReport, REPORT_INTERVAL_MS);
-  console.log('[report] 3-day visit report scheduler started.');
+  startReportScheduler();
 });
